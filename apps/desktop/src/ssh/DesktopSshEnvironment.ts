@@ -132,33 +132,38 @@ export const make = Effect.gen(function* () {
   const runtimeContext = yield* Effect.context<DesktopSshEnvironmentRuntimeServices>();
   const passwordPrompt = SshAuth.SshPasswordPrompt.of(makePasswordPrompt(prompts));
 
+  // Unnamed wrappers preserve the explicit span names and options below.
   return DesktopSshEnvironment.of({
-    discoverHosts: (input) =>
-      discoverDesktopSshHostsEffect(input).pipe(
+    discoverHosts: Effect.fn(function (input) {
+      return discoverDesktopSshHostsEffect(input).pipe(
         Effect.provide(runtimeContext),
         Effect.withSpan("desktop.ssh.discoverHosts"),
-      ),
-    resolveHost: (alias) =>
-      resolveSshTarget(alias.trim()).pipe(
+      );
+    }),
+    resolveHost: Effect.fn(function (alias) {
+      return resolveSshTarget(alias.trim()).pipe(
         Effect.provide(runtimeContext),
         Effect.withSpan("desktop.ssh.resolveHost"),
-      ),
-    ensureEnvironment: (target, ensureOptions) =>
-      manager
+      );
+    }),
+    ensureEnvironment: Effect.fn(function (target, ensureOptions) {
+      return manager
         .ensureEnvironment(target, ensureOptions)
         .pipe(
           Effect.provideService(SshAuth.SshPasswordPrompt, passwordPrompt),
           Effect.provide(runtimeContext),
           Effect.withSpan("desktop.ssh.ensureEnvironment"),
-        ),
-    disconnectEnvironment: (target) =>
-      manager
+        );
+    }),
+    disconnectEnvironment: Effect.fn(function (target) {
+      return manager
         .disconnectEnvironment(target)
         .pipe(
           Effect.provideService(SshAuth.SshPasswordPrompt, passwordPrompt),
           Effect.provide(runtimeContext),
           Effect.withSpan("desktop.ssh.disconnectEnvironment"),
-        ),
+        );
+    }),
   });
 });
 

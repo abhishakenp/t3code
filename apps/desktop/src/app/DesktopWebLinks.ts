@@ -68,17 +68,20 @@ const make = Effect.gen(function* () {
     };
   });
 
+  // Unnamed wrappers preserve the explicit span names and options below.
   return DesktopWebLinks.of({
-    receive: (url) =>
-      Effect.suspend(() => {
+    receive: Effect.fn(function (url) {
+      return Effect.suspend(() => {
         pending.push(url);
         return flush;
-      }).pipe(Effect.withSpan("DesktopWebLinks.receive")),
-    setRendererReady: (ready) =>
-      (ready ? startListening : Effect.sync(stopListening)).pipe(
+      }).pipe(Effect.withSpan("DesktopWebLinks.receive"));
+    }),
+    setRendererReady: Effect.fn(function (ready) {
+      return (ready ? startListening : Effect.sync(stopListening)).pipe(
         Effect.andThen(flush),
         Effect.withSpan("DesktopWebLinks.setRendererReady"),
-      ),
+      );
+    }),
   });
 });
 
