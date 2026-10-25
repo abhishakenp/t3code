@@ -216,6 +216,7 @@ export default defineConfig({
       perf: "warn",
     },
     rules: {
+      "react/jsx-no-constructed-context-values": "off",
       "react/purity": "off",
       "eslint/no-new": "error",
       "unicorn/no-useless-spread": "error",
